@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《為學》互動學習網</title>
+    <!-- 引入 Tailwind CSS 作為樣式框架 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定義動畫 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] font-sans text-gray-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- 標題區塊 -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-amber-700 mb-2">
+                《為學一首示子姪》互動學習
+            </h1>
+            <p class="text-lg text-gray-600">點擊下方按鈕切換遊戲 🎮</p>
+        </header>
+
+        <!-- 導航列 -->
+        <div class="flex justify-center gap-4 mb-8">
+            <button onclick="switchTab('match')" id="tab-match" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-amber-500 text-white transform scale-105 border-2 border-transparent">
+                🔍 重點字詞配對
+            </button>
+            <button onclick="switchTab('sentence')" id="tab-sentence" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50">
+                🧩 文言造句積木
+            </button>
+        </div>
+
+        <!-- 內容區域 -->
+        <div class="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100 min-h-[500px]">
+            
+            <!-- 遊戲 1：重點字詞配對 -->
+            <div id="game-match" class="block fade-in">
+                <h2 class="text-2xl font-bold text-amber-600 mb-6 flex items-center gap-2">
+                    <span>🔍</span> 找一找，連一連
+                </h2>
+                <p class="mb-6 text-gray-600 text-lg">請點擊左邊的文言字詞，再點擊右邊對應的意思和圖案。</p>
+                
+                <div id="match-success-msg" class="hidden mb-8 p-4 bg-green-100 text-green-800 rounded-xl text-center font-bold text-xl animate-bounce">
+                    🎉 太棒了！你已經成功配對所有字詞！ 🎉
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 md:gap-16">
+                    <!-- 左側：文言文 -->
+                    <div id="match-left" class="flex flex-col gap-4"></div>
+                    <!-- 右側：意思與Emoji -->
+                    <div id="match-right" class="flex flex-col gap-4"></div>
+                </div>
+            </div>
+
+            <!-- 遊戲 2：文言造句積木 -->
+            <div id="game-sentence" class="hidden fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="sentence-title" class="text-2xl font-bold text-emerald-600 flex items-center gap-2">
+                        <span>🧩</span> 積木排排看 (1/3)
+                    </h2>
+                </div>
+
+                <!-- 提示區 -->
+                <div class="bg-emerald-50 rounded-2xl p-6 mb-8 border-2 border-emerald-100">
+                    <p class="text-emerald-800 font-bold mb-2">白話文提示：</p>
+                    <p id="sentence-hint" class="text-xl md:text-2xl text-emerald-900 font-bold"></p>
+                </div>
+
+                <!-- 答題區 (空格) -->
+                <div class="mb-10">
+                    <p class="text-gray-500 font-medium mb-3">文言文積木區 (點擊下方積木放入)：</p>
+                    <div id="sentence-slots" class="flex flex-wrap gap-2 md:gap-4 p-4 bg-gray-50 rounded-2xl min-h-[100px] border-2 border-dashed border-gray-300 items-center">
+                        <!-- Slots will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 字庫區 -->
+                <div id="bank-container">
+                    <p class="text-gray-500 font-medium mb-3">請點選積木：</p>
+                    <div id="sentence-bank" class="flex flex-wrap gap-3 md:gap-4 justify-center">
+                        <!-- Bank buttons will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 成功回饋 -->
+                <div id="sentence-success" class="hidden text-center mt-8 fade-in">
+                    <div class="inline-block bg-green-100 border-2 border-green-400 text-green-800 px-8 py-4 rounded-2xl text-2xl font-bold mb-6 shadow-lg">
+                        ✨ 答對了！句子非常通順！ ✨
+                    </div>
+                    <br>
+                    <button id="next-sentence-btn" onclick="nextSentence()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-xl font-bold shadow-md transform transition hover:scale-105">
+                        下一題 👉
+                    </button>
+                    <div id="all-sentence-complete" class="hidden text-2xl font-bold text-amber-600">
+                        🏆 恭喜你完成了所有造句挑戰！
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 資料庫 (Database)
+        // ==========================================
+        const vocabData = [
+            { id: 1, term: "乎", meaning: "嗎 (❓) - 表示疑問" },
+            { id: 2, term: "為", meaning: "做 / 行動 (🏃)" },
+            { id: 3, term: "鄙", meaning: "邊境 / 偏遠地方 (🏘️)" },
+            { id: 4, term: "語", meaning: "告訴 (🗣️)" },
+            { id: 5, term: "之", meaning: "去 / 往 (🚶)" },
+            { id: 6, term: "恃", meaning: "憑 / 依靠 (💪)" },
+            { id: 7, term: "買舟", meaning: "僱船 (🚤)" },
+            { id: 8, term: "旦旦", meaning: "天天 (📅)" }
+        ];
+
+        const sentencesData = [
+            {
+                id: 1,
+                hint: "只要去做，那麼困難的事也變得容易了。",
+                words: ["為", "之", "，", "則", "難", "者", "亦", "易", "矣", "。"],
+                shuffled: ["易", "則", "為", "亦", "矣", "之", "者", "難", "，", "。"]
+            },
+            {
+                id: 2,
+                hint: "你憑什麼去？",
+                words: ["子", "何", "恃", "而", "往", "？"],
+                shuffled: ["恃", "往", "子", "何", "？", "而"]
+            },
+            {
+                id: 3,
+                hint: "天天學習它，長久不懶惰。",
+                words: ["旦旦", "而", "學", "之", "，", "久", "而", "不", "怠", "。"],
+                shuffled: ["之", "久", "旦旦", "學", "怠", "不", "而", "，", "而", "。"]
+            }
+        ];
+
+        // ==========================================
+        // 頁面切換邏輯
+        // ==========================================
+        function switchTab(tab) {
+            const btnMatch = document.getElementById('tab-match');
+            const btnSentence = document.getElementById('tab-sentence');
+            const gameMatch = document.getElementById('game-match');
+            const gameSentence = document.getElementById('game-sentence');
+
+            if (tab === 'match') {
+                btnMatch.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-amber-500 text-white transform scale-105 border-2 border-transparent";
+                btnSentence.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50";
+                gameMatch.classList.remove('hidden');
+                gameSentence.classList.add('hidden');
+            } else {
+                btnSentence.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-emerald-500 text-white transform scale-105 border-2 border-transparent";
+                btnMatch.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-amber-700 border-2 border-amber-200 hover:bg-amber-50";
+                gameSentence.classList.remove('hidden');
+                gameMatch.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // 遊戲 1：配對遊戲邏輯
+        // ==========================================
+        let leftItems = [...vocabData];
+        let rightItems = [...vocabData].sort(() => Math.random() - 0.5);
+        let selectedLeft = null;
+        let selectedRight = null;
+        let matchedPairs = [];
+
+        function renderMatchGame() {
+            const leftContainer = document.getElementById('match-left');
+            const rightContainer = document.getElementById('match-right');
+            const successMsg = document.getElementById('match-success-msg');
+
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            // 檢查是否完成
+            if (matchedPairs.length === vocabData.length) {
+                successMsg.classList.remove('hidden');
+            }
+
+            // 渲染左側
+            leftItems.forEach(item => {
+                const isMatched = matchedPairs.includes(item.id);
+                const isSelected = selectedLeft === item.id;
+                
+                let btnClass = "p-4 rounded-xl text-xl md:text-2xl font-bold transition-all border-4 text-center cursor-pointer ";
+                if (isMatched) {
+                    btnClass += "bg-gray-100 border-gray-200 text-gray-400 opacity-50 cursor-not-allowed";
+                } else if (isSelected) {
+                    btnClass += "bg-amber-100 border-amber-500 text-amber-800 scale-105 shadow-md";
+                } else {
+                    btnClass += "bg-white border-gray-200 text-gray-700 hover:border-amber-300 hover:bg-amber-50 shadow-sm";
+                }
+
+                leftContainer.innerHTML += `<button onclick="handleMatchClick('left', ${item.id})" class="${btnClass}" ${isMatched ? 'disabled' : ''}>${item.term}</button>`;
+            });
+
+            // 渲染右側
+            rightItems.forEach(item => {
+                const isMatched = matchedPairs.includes(item.id);
+                const isSelected = selectedRight === item.id;
+                
+                let btnClass = "p-3 md:p-4 rounded-xl text-lg md:text-xl font-medium transition-all border-4 text-left flex items-center justify-between cursor-pointer ";
+                if (isMatched) {
+                    btnClass += "bg-gray-100 border-gray-200 text-gray-400 opacity-50 cursor-not-allowed";
+                } else if (isSelected) {
+                    btnClass += "bg-blue-100 border-blue-500 text-blue-800 scale-105 shadow-md";
+                } else {
+                    btnClass += "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 shadow-sm";
+                }
+
+                rightContainer.innerHTML += `<button onclick="handleMatchClick('right', ${item.id})" class="${btnClass}" ${isMatched ? 'disabled' : ''}>${item.meaning}</button>`;
+            });
+        }
+
+        function handleMatchClick(side, id) {
+            if (side === 'left') {
+                selectedLeft = selectedLeft === id ? null : id; // Toggle
+            } else {
+                selectedRight = selectedRight === id ? null : id; // Toggle
+            }
+
+            renderMatchGame(); // 重新渲染選取狀態
+
+            // 檢查配對
+            if (selectedLeft !== null && selectedRight !== null) {
+                if (selectedLeft === selectedRight) {
+                    // 配對成功
+                    matchedPairs.push(selectedLeft);
+                    selectedLeft = null;
+                    selectedRight = null;
+                    renderMatchGame();
+                } else {
+                    // 配對失敗：加入動畫並延遲重置
+                    const leftBtns = document.getElementById('match-left').children;
+                    const rightBtns = document.getElementById('match-right').children;
+                    
+                    // 找出被選中的按鈕並加入錯誤樣式
+                    Array.from(leftBtns).forEach(btn => {
+                        if(btn.className.includes('bg-amber-100')) {
+                            btn.className = btn.className.replace('bg-amber-100 border-amber-500', 'bg-red-100 border-red-500 text-red-700 animate-shake');
+                        }
+                    });
+                    Array.from(rightBtns).forEach(btn => {
+                        if(btn.className.includes('bg-blue-100')) {
+                            btn.className = btn.className.replace('bg-blue-100 border-blue-500', 'bg-red-100 border-red-500 text-red-700 animate-shake');
+                        }
+                    });
+
+                    setTimeout(() => {
+                        selectedLeft = null;
+                        selectedRight = null;
+                        renderMatchGame();
+                    }, 600); // 0.6秒後重置
+                }
+            }
+        }
+
+        // ==========================================
+        // 遊戲 2：積木造句邏輯
+        // ==========================================
+        let currentSentenceIndex = 0;
+        let slots = [];
+        let bank = [];
+
+        function initSentenceGame() {
+            const sentence = sentencesData[currentSentenceIndex];
+            document.getElementById('sentence-title').innerHTML = `<span>🧩</span> 積木排排看 (${currentSentenceIndex + 1}/${sentencesData.length})`;
+            document.getElementById('sentence-hint').innerText = sentence.hint;
+            
+            slots = Array(sentence.words.length).fill(null);
+            bank = [...sentence.shuffled];
+            
+            document.getElementById('sentence-success').classList.add('hidden');
+            document.getElementById('bank-container').classList.remove('hidden');
+            document.getElementById('next-sentence-btn').classList.remove('hidden');
+            document.getElementById('all-sentence-complete').classList.add('hidden');
+            
+            renderSentenceGame();
+        }
+
+        function renderSentenceGame() {
+            const slotsContainer = document.getElementById('sentence-slots');
+            const bankContainer = document.getElementById('sentence-bank');
+            
+            // 渲染空格
+            slotsContainer.innerHTML = '';
+            slots.forEach((word, index) => {
+                if (word !== null) {
+                    slotsContainer.innerHTML += `
+                        <button onclick="moveSlotToBank(${index})" class="h-12 md:h-16 min-w-[3rem] md:min-w-[4rem] px-2 rounded-lg text-xl md:text-3xl font-bold flex items-center justify-center transition-all bg-emerald-500 text-white shadow-md hover:bg-red-400 hover:scale-105 cursor-pointer">
+                            ${word}
+                        </button>`;
+                } else {
+                    slotsContainer.innerHTML += `
+                        <div class="h-12 md:h-16 min-w-[3rem] md:min-w-[4rem] px-2 rounded-lg text-xl md:text-3xl flex items-center justify-center bg-gray-200 border-b-4 border-gray-300"></div>`;
+                }
+            });
+
+            // 渲染字庫
+            bankContainer.innerHTML = '';
+            bank.forEach((word, index) => {
+                if (word !== null) {
+                    bankContainer.innerHTML += `
+                        <button onclick="moveBankToSlot(${index})" class="px-4 py-3 bg-white border-2 border-gray-300 rounded-xl shadow-sm text-xl md:text-3xl font-bold text-gray-700 hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-800 hover:-translate-y-1 transition-all">
+                            ${word}
+                        </button>`;
+                } else {
+                    bankContainer.innerHTML += `
+                        <div class="px-4 py-3 bg-transparent border-2 border-transparent rounded-xl text-xl md:text-3xl text-transparent pointer-events-none">無</div>`;
+                }
+            });
+
+            checkSentenceWin();
+        }
+
+        function moveBankToSlot(bankIndex) {
+            const word = bank[bankIndex];
+            const emptySlotIndex = slots.findIndex(s => s === null);
+            
+            if (emptySlotIndex !== -1) {
+                slots[emptySlotIndex] = word;
+                bank[bankIndex] = null;
+                renderSentenceGame();
+            }
+        }
+
+        function moveSlotToBank(slotIndex) {
+            const word = slots[slotIndex];
+            const emptyBankIndex = bank.findIndex(b => b === null);
+            
+            if (emptyBankIndex !== -1) {
+                bank[emptyBankIndex] = word;
+                slots[slotIndex] = null;
+                renderSentenceGame();
+            }
+        }
+
+        function checkSentenceWin() {
+            if (slots.every(s => s !== null)) {
+                const target = sentencesData[currentSentenceIndex].words.join('');
+                const current = slots.join('');
+                
+                if (target === current) {
+                    // 答對了
+                    document.getElementById('bank-container').classList.add('hidden');
+                    document.getElementById('sentence-success').classList.remove('hidden');
+                    
+                    if (currentSentenceIndex === sentencesData.length - 1) {
+                        // 全破
+                        document.getElementById('next-sentence-btn').classList.add('hidden');
+                        document.getElementById('all-sentence-complete').classList.remove('hidden');
+                    }
+                }
+            }
+        }
+
+        function nextSentence() {
+            if (currentSentenceIndex < sentencesData.length - 1) {
+                currentSentenceIndex++;
+                initSentenceGame();
+            }
+        }
+
+        // 初始化
+        window.onload = () => {
+            renderMatchGame();
+            initSentenceGame();
+        };
+
+    </script>
+</body>
+</html>
