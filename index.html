@@ -38,12 +38,18 @@
         </header>
 
         <!-- 導航列 -->
-        <div class="flex justify-center gap-4 mb-8">
+        <div class="flex justify-center gap-4 mb-8 flex-wrap">
             <button onclick="switchTab('match')" id="tab-match" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-amber-500 text-white transform scale-105 border-2 border-transparent">
                 🔍 重點字詞配對
             </button>
-            <button onclick="switchTab('sentence')" id="tab-sentence" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50">
-                🧩 文言造句積木
+            <button onclick="switchTab('emoji')" id="tab-emoji" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50">
+                🕵️‍♂️ Emoji 猜猜看
+            </button>
+            <button onclick="switchTab('sentence')" id="tab-sentence" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50">
+                🧩 文言造句
+            </button>
+            <button onclick="switchTab('sequence')" id="tab-sequence" class="px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-purple-700 border-2 border-purple-200 hover:bg-purple-50">
+                🔄 故事排序
             </button>
         </div>
 
@@ -69,31 +75,65 @@
                 </div>
             </div>
 
-            <!-- 遊戲 2：文言造句積木 -->
-            <div id="game-sentence" class="hidden fade-in">
+            <!-- 遊戲 2：Emoji 猜猜看 -->
+            <div id="game-emoji" class="hidden fade-in">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 id="sentence-title" class="text-2xl font-bold text-emerald-600 flex items-center gap-2">
-                        <span>🧩</span> 積木排排看 (1/3)
+                    <h2 id="emoji-title" class="text-2xl font-bold text-emerald-600 flex items-center gap-2">
+                        <span>🕵️‍♂️</span> Emoji 密碼破解 (1/3)
                     </h2>
                 </div>
 
-                <!-- 提示區 -->
-                <div class="bg-emerald-50 rounded-2xl p-6 mb-8 border-2 border-emerald-100">
-                    <p class="text-emerald-800 font-bold mb-2">白話文提示：</p>
-                    <p id="sentence-hint" class="text-xl md:text-2xl text-emerald-900 font-bold"></p>
+                <!-- 密碼顯示區 -->
+                <div class="bg-emerald-50 rounded-2xl p-8 mb-8 border-2 border-emerald-200 text-center shadow-inner">
+                    <p class="text-gray-500 font-bold mb-4">這段 Emoji 代表哪一句文言文？</p>
+                    <p id="emoji-display" class="text-4xl md:text-6xl tracking-widest mb-6"></p>
+                    <p id="emoji-hint" class="text-lg md:text-xl text-emerald-800 font-medium bg-white inline-block px-4 py-2 rounded-full shadow-sm"></p>
                 </div>
 
-                <!-- 答題區 (空格) -->
+                <!-- 選擇題區 -->
                 <div class="mb-10">
-                    <p class="text-gray-500 font-medium mb-3">文言文積木區 (點擊下方積木放入)：</p>
-                    <div id="sentence-slots" class="flex flex-wrap gap-2 md:gap-4 p-4 bg-gray-50 rounded-2xl min-h-[100px] border-2 border-dashed border-gray-300 items-center">
+                    <div id="emoji-options" class="flex flex-col gap-4">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 成功回饋 -->
+                <div id="emoji-success" class="hidden text-center mt-8 fade-in">
+                    <div class="inline-block bg-green-100 border-2 border-green-400 text-green-800 px-8 py-4 rounded-2xl text-2xl font-bold mb-6 shadow-lg animate-bounce">
+                        ✨ 答對了！破解成功！ ✨
+                    </div>
+                    <br>
+                    <button id="next-emoji-btn" onclick="nextEmoji()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-xl font-bold shadow-md transform transition hover:scale-105">
+                        下一題 👉
+                    </button>
+                    <div id="all-emoji-complete" class="hidden text-2xl font-bold text-amber-600">
+                        🏆 太厲害了！你已經破解了所有 Emoji 密碼！
+                    </div>
+                </div>
+            </div>
+
+            <!-- 遊戲 3：文言造句積木 (降級簡單版) -->
+            <div id="game-sentence" class="hidden fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="sentence-title" class="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                        <span>🧩</span> 文言造句 (1/3)
+                    </h2>
+                </div>
+
+                <div class="bg-blue-50 rounded-2xl p-6 mb-8 border-2 border-blue-100">
+                    <p class="text-blue-800 font-bold text-lg md:text-xl">請按照下方標籤的「白話文提示」，依序點擊正確的文言積木拼出原文：</p>
+                </div>
+
+                <!-- 答題區 (帶有提示色塊) -->
+                <div class="mb-10">
+                    <div id="sentence-slots" class="flex flex-wrap gap-2 md:gap-4 p-4 bg-gray-50 rounded-2xl min-h-[120px] border-2 border-dashed border-gray-300 items-end justify-center">
                         <!-- Slots will be injected here -->
                     </div>
                 </div>
 
                 <!-- 字庫區 -->
-                <div id="bank-container">
-                    <p class="text-gray-500 font-medium mb-3">請點選積木：</p>
+                <div id="sentence-bank-container">
+                    <p class="text-gray-500 font-medium mb-3 text-center">請點選積木 (順序點擊)：</p>
                     <div id="sentence-bank" class="flex flex-wrap gap-3 md:gap-4 justify-center">
                         <!-- Bank buttons will be injected here -->
                     </div>
@@ -101,18 +141,52 @@
 
                 <!-- 成功回饋 -->
                 <div id="sentence-success" class="hidden text-center mt-8 fade-in">
-                    <div class="inline-block bg-green-100 border-2 border-green-400 text-green-800 px-8 py-4 rounded-2xl text-2xl font-bold mb-6 shadow-lg">
-                        ✨ 答對了！句子非常通順！ ✨
+                    <div class="inline-block bg-green-100 border-2 border-green-400 text-green-800 px-8 py-4 rounded-2xl text-2xl font-bold mb-6 shadow-lg animate-bounce">
+                        ✨ 拼對了！句子很完整！ ✨
                     </div>
                     <br>
-                    <button id="next-sentence-btn" onclick="nextSentence()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-xl font-bold shadow-md transform transition hover:scale-105">
+                    <button id="next-sentence-btn" onclick="nextSentence()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-xl font-bold shadow-md transform transition hover:scale-105">
                         下一題 👉
                     </button>
                     <div id="all-sentence-complete" class="hidden text-2xl font-bold text-amber-600">
                         🏆 恭喜你完成了所有造句挑戰！
                     </div>
                 </div>
+            </div>
 
+            <!-- 遊戲 4：故事排序 -->
+            <div id="game-sequence" class="hidden fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-purple-600 flex items-center gap-2">
+                        <span>🔄</span> 故事順序排排看
+                    </h2>
+                </div>
+
+                <div class="bg-purple-50 rounded-2xl p-6 mb-8 border-2 border-purple-100">
+                    <p class="text-purple-800 font-bold text-lg">請依照故事發生的先後順序，點擊下方的情節放入方框中：</p>
+                </div>
+
+                <!-- 排序結果區 -->
+                <div class="mb-10">
+                    <div id="sequence-slots" class="flex flex-col gap-3 p-4 bg-gray-50 rounded-2xl min-h-[120px] border-2 border-dashed border-gray-300">
+                        <!-- Slots will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 選項區 -->
+                <div id="sequence-bank-container">
+                    <p class="text-gray-500 font-medium mb-3">請點選放入：</p>
+                    <div id="sequence-bank" class="flex flex-col gap-3">
+                        <!-- Bank items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 成功回饋 -->
+                <div id="sequence-success" class="hidden text-center mt-8 fade-in">
+                    <div class="inline-block bg-green-100 border-2 border-green-400 text-green-800 px-8 py-4 rounded-2xl text-2xl font-bold mb-6 shadow-lg animate-bounce">
+                        ✨ 排序正確！你很了解這個故事！ ✨
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -127,53 +201,124 @@
             { id: 2, term: "為", meaning: "做 / 行動 (🏃)" },
             { id: 3, term: "鄙", meaning: "邊境 / 偏遠地方 (🏘️)" },
             { id: 4, term: "語", meaning: "告訴 (🗣️)" },
-            { id: 5, term: "之", meaning: "去 / 往 (🚶)" },
+            { id: 5, term: "之", meaning: "它 (📦) - 指代學問" },
             { id: 6, term: "恃", meaning: "憑 / 依靠 (💪)" },
             { id: 7, term: "買舟", meaning: "僱船 (🚤)" },
             { id: 8, term: "旦旦", meaning: "天天 (📅)" }
         ];
 
-        const sentencesData = [
+        const emojiData = [
             {
                 id: 1,
-                hint: "只要去做，那麼困難的事也變得容易了。",
-                words: ["為", "之", "，", "則", "難", "者", "亦", "易", "矣", "。"],
-                shuffled: ["易", "則", "為", "亦", "矣", "之", "者", "難", "，", "。"]
+                emojis: "🏃 👉 難 ➡️ 易 ✅",
+                hint: "💡 提示：只要去做，困難的也會變容易。",
+                options: [
+                    "為之，則難者亦易矣。",
+                    "不為，則易者亦難矣。",
+                    "吾欲之南海，何如？"
+                ],
+                answer: 0
             },
             {
                 id: 2,
-                hint: "你憑什麼去？",
-                words: ["子", "何", "恃", "而", "往", "？"],
+                emojis: "👉 ❓ 💪 🚶",
+                hint: "💡 提示：你憑什麼去呢？",
+                options: [
+                    "吾一瓶一缽足矣。",
+                    "子何恃而往？",
+                    "貧者語於富者曰。"
+                ],
+                answer: 1
+            },
+            {
+                id: 3,
+                emojis: "📅 📅 📚 📦",
+                hint: "💡 提示：天天學習它。",
+                options: [
+                    "久而不怠焉。",
+                    "學之，則難者亦易矣。",
+                    "旦旦而學之。"
+                ],
+                answer: 2
+            }
+        ];
+
+        const sentenceBlocksData = [
+            {
+                id: 1,
+                pairs: [
+                    { word: "為之", hint: "去做它" },
+                    { word: "，", hint: "，" },
+                    { word: "則", hint: "那麼" },
+                    { word: "難者", hint: "困難的事" },
+                    { word: "亦", hint: "也" },
+                    { word: "易", hint: "變容易" },
+                    { word: "矣", hint: "了" },
+                    { word: "。", hint: "。" }
+                ],
+                shuffled: ["易", "則", "為之", "亦", "矣", "難者", "。", "，"]
+            },
+            {
+                id: 2,
+                pairs: [
+                    { word: "子", hint: "你" },
+                    { word: "何", hint: "什麼" },
+                    { word: "恃", hint: "憑/依靠" },
+                    { word: "而", hint: "而" },
+                    { word: "往", hint: "去呢" },
+                    { word: "？", hint: "？" }
+                ],
                 shuffled: ["恃", "往", "子", "何", "？", "而"]
             },
             {
                 id: 3,
-                hint: "天天學習它，長久不懶惰。",
-                words: ["旦旦", "而", "學", "之", "，", "久", "而", "不", "怠", "。"],
-                shuffled: ["之", "久", "旦旦", "學", "怠", "不", "而", "，", "而", "。"]
+                pairs: [
+                    { word: "旦旦", hint: "天天" },
+                    { word: "而", hint: "地" },
+                    { word: "學之", hint: "學習它" },
+                    { word: "，", hint: "，" },
+                    { word: "久", hint: "長久" },
+                    { word: "而", hint: "地" },
+                    { word: "不怠", hint: "不懶惰" },
+                    { word: "。", hint: "。" }
+                ],
+                shuffled: ["學之", "久", "旦旦", "不怠", "而", "，", "而", "。"]
             }
+        ];
+
+        const sequenceData = [
+            { id: 1, text: "起始：蜀之鄙有二僧 (一貧一富) 👨‍🦲👨‍🦲" },
+            { id: 2, text: "對話：貧者欲之南海，富者嘲笑 💬" },
+            { id: 3, text: "行動：貧者一瓶一缽出發，富者等待買舟 🚶‍♂️🚤" },
+            { id: 4, text: "結果：越明年，貧者還，富者慚 😳🏆" }
         ];
 
         // ==========================================
         // 頁面切換邏輯
         // ==========================================
         function switchTab(tab) {
-            const btnMatch = document.getElementById('tab-match');
-            const btnSentence = document.getElementById('tab-sentence');
-            const gameMatch = document.getElementById('game-match');
-            const gameSentence = document.getElementById('game-sentence');
+            const tabs = ['match', 'emoji', 'sentence', 'sequence'];
+            const colors = {
+                'match': { active: 'bg-amber-500 text-white shadow-md border-transparent transform scale-105', inactive: 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50' },
+                'emoji': { active: 'bg-emerald-500 text-white shadow-md border-transparent transform scale-105', inactive: 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50' },
+                'sentence': { active: 'bg-blue-500 text-white shadow-md border-transparent transform scale-105', inactive: 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50' },
+                'sequence': { active: 'bg-purple-500 text-white shadow-md border-transparent transform scale-105', inactive: 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50' }
+            };
 
-            if (tab === 'match') {
-                btnMatch.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-amber-500 text-white transform scale-105 border-2 border-transparent";
-                btnSentence.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50";
-                gameMatch.classList.remove('hidden');
-                gameSentence.classList.add('hidden');
-            } else {
-                btnSentence.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-md bg-emerald-500 text-white transform scale-105 border-2 border-transparent";
-                btnMatch.className = "px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm bg-white text-amber-700 border-2 border-amber-200 hover:bg-amber-50";
-                gameSentence.classList.remove('hidden');
-                gameMatch.classList.add('hidden');
-            }
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const game = document.getElementById(`game-${t}`);
+                
+                // 重設樣式
+                btn.className = `px-6 py-3 rounded-full text-lg font-bold transition-all shadow-sm border-2 ${t === tab ? colors[t].active : colors[t].inactive}`;
+                
+                // 顯示/隱藏遊戲
+                if (t === tab) {
+                    game.classList.remove('hidden');
+                } else {
+                    game.classList.add('hidden');
+                }
+            });
         }
 
         // ==========================================
@@ -277,22 +422,92 @@
         }
 
         // ==========================================
-        // 遊戲 2：積木造句邏輯
+        // 遊戲 2：Emoji 猜猜看邏輯
+        // ==========================================
+        let currentEmojiIndex = 0;
+        let isEmojiAnswered = false;
+
+        function initEmojiGame() {
+            const data = emojiData[currentEmojiIndex];
+            document.getElementById('emoji-title').innerHTML = `<span>🕵️‍♂️</span> Emoji 密碼破解 (${currentEmojiIndex + 1}/${emojiData.length})`;
+            document.getElementById('emoji-display').innerText = data.emojis;
+            document.getElementById('emoji-hint').innerText = data.hint;
+            
+            isEmojiAnswered = false;
+            document.getElementById('emoji-success').classList.add('hidden');
+            document.getElementById('next-emoji-btn').classList.remove('hidden');
+            document.getElementById('all-emoji-complete').classList.add('hidden');
+            
+            renderEmojiOptions();
+        }
+
+        function renderEmojiOptions() {
+            const optionsContainer = document.getElementById('emoji-options');
+            const data = emojiData[currentEmojiIndex];
+            
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                optionsContainer.innerHTML += `
+                    <button id="opt-${index}" onclick="checkEmojiAnswer(${index})" class="w-full p-4 md:p-6 bg-white border-4 border-gray-200 rounded-2xl text-xl md:text-2xl font-bold text-gray-700 hover:border-emerald-400 hover:bg-emerald-50 transition-all text-left shadow-sm">
+                        ${opt}
+                    </button>`;
+            });
+        }
+
+        function checkEmojiAnswer(selectedIndex) {
+            if (isEmojiAnswered) return; // 防止重複點擊
+            
+            const data = emojiData[currentEmojiIndex];
+            const buttons = document.getElementById('emoji-options').children;
+
+            if (selectedIndex === data.answer) {
+                // 答對了
+                isEmojiAnswered = true;
+                buttons[selectedIndex].className = buttons[selectedIndex].className.replace('border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 text-gray-700', 'bg-emerald-100 border-emerald-500 text-emerald-800 scale-[1.02] shadow-md');
+                
+                document.getElementById('emoji-success').classList.remove('hidden');
+                
+                if (currentEmojiIndex === emojiData.length - 1) {
+                    document.getElementById('next-emoji-btn').classList.add('hidden');
+                    document.getElementById('all-emoji-complete').classList.remove('hidden');
+                }
+            } else {
+                // 答錯了，按鈕變紅並震動
+                buttons[selectedIndex].className = buttons[selectedIndex].className.replace('border-gray-200 hover:border-emerald-400 hover:bg-emerald-50', 'bg-red-50 border-red-400 text-red-600 animate-shake');
+                
+                // 延遲後恢復原狀，讓學生可以重試
+                setTimeout(() => {
+                    if (!isEmojiAnswered) {
+                        buttons[selectedIndex].className = buttons[selectedIndex].className.replace('bg-red-50 border-red-400 text-red-600 animate-shake', 'bg-white border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-emerald-50');
+                    }
+                }, 800);
+            }
+        }
+
+        function nextEmoji() {
+            if (currentEmojiIndex < emojiData.length - 1) {
+                currentEmojiIndex++;
+                initEmojiGame();
+            }
+        }
+
+        // ==========================================
+        // 遊戲 3：文言造句積木 (提示點擊版)
         // ==========================================
         let currentSentenceIndex = 0;
-        let slots = [];
-        let bank = [];
+        let sentenceSlots = [];
+        let sentenceBank = [];
 
         function initSentenceGame() {
-            const sentence = sentencesData[currentSentenceIndex];
-            document.getElementById('sentence-title').innerHTML = `<span>🧩</span> 積木排排看 (${currentSentenceIndex + 1}/${sentencesData.length})`;
-            document.getElementById('sentence-hint').innerText = sentence.hint;
+            const data = sentenceBlocksData[currentSentenceIndex];
+            document.getElementById('sentence-title').innerHTML = `<span>🧩</span> 文言造句 (${currentSentenceIndex + 1}/${sentenceBlocksData.length})`;
             
-            slots = Array(sentence.words.length).fill(null);
-            bank = [...sentence.shuffled];
+            // 初始化 slots (全部為 null)
+            sentenceSlots = Array(data.pairs.length).fill(null);
+            sentenceBank = [...data.shuffled];
             
             document.getElementById('sentence-success').classList.add('hidden');
-            document.getElementById('bank-container').classList.remove('hidden');
+            document.getElementById('sentence-bank-container').classList.remove('hidden');
             document.getElementById('next-sentence-btn').classList.remove('hidden');
             document.getElementById('all-sentence-complete').classList.add('hidden');
             
@@ -300,92 +515,174 @@
         }
 
         function renderSentenceGame() {
+            const data = sentenceBlocksData[currentSentenceIndex];
             const slotsContainer = document.getElementById('sentence-slots');
             const bankContainer = document.getElementById('sentence-bank');
             
-            // 渲染空格
+            // 渲染答題區 (上方空格，下方白話文提示)
             slotsContainer.innerHTML = '';
-            slots.forEach((word, index) => {
-                if (word !== null) {
-                    slotsContainer.innerHTML += `
-                        <button onclick="moveSlotToBank(${index})" class="h-12 md:h-16 min-w-[3rem] md:min-w-[4rem] px-2 rounded-lg text-xl md:text-3xl font-bold flex items-center justify-center transition-all bg-emerald-500 text-white shadow-md hover:bg-red-400 hover:scale-105 cursor-pointer">
-                            ${word}
-                        </button>`;
-                } else {
-                    slotsContainer.innerHTML += `
-                        <div class="h-12 md:h-16 min-w-[3rem] md:min-w-[4rem] px-2 rounded-lg text-xl md:text-3xl flex items-center justify-center bg-gray-200 border-b-4 border-gray-300"></div>`;
-                }
+            data.pairs.forEach((pair, index) => {
+                const word = sentenceSlots[index];
+                slotsContainer.innerHTML += `
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="h-14 min-w-[3.5rem] px-2 rounded-lg text-xl md:text-2xl font-bold flex items-center justify-center transition-all ${word ? 'bg-blue-500 text-white shadow-md border-b-4 border-blue-700' : 'bg-gray-200 border-b-4 border-gray-300'}">
+                            ${word ? word : ''}
+                        </div>
+                        <div class="text-sm font-bold text-blue-800 bg-blue-100 px-2 py-1 rounded-md text-center shadow-sm">
+                            ${pair.hint}
+                        </div>
+                    </div>`;
             });
 
             // 渲染字庫
             bankContainer.innerHTML = '';
-            bank.forEach((word, index) => {
+            sentenceBank.forEach((word, index) => {
                 if (word !== null) {
                     bankContainer.innerHTML += `
-                        <button onclick="moveBankToSlot(${index})" class="px-4 py-3 bg-white border-2 border-gray-300 rounded-xl shadow-sm text-xl md:text-3xl font-bold text-gray-700 hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-800 hover:-translate-y-1 transition-all">
+                        <button onclick="handleSentenceClick('${word}', ${index})" class="px-4 py-3 bg-white border-2 border-gray-300 rounded-xl shadow-sm text-xl md:text-2xl font-bold text-gray-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 hover:-translate-y-1 transition-all">
                             ${word}
                         </button>`;
                 } else {
                     bankContainer.innerHTML += `
-                        <div class="px-4 py-3 bg-transparent border-2 border-transparent rounded-xl text-xl md:text-3xl text-transparent pointer-events-none">無</div>`;
+                        <div class="px-4 py-3 bg-transparent border-2 border-transparent rounded-xl text-xl md:text-2xl text-transparent pointer-events-none">無</div>`;
                 }
             });
 
             checkSentenceWin();
         }
 
-        function moveBankToSlot(bankIndex) {
-            const word = bank[bankIndex];
-            const emptySlotIndex = slots.findIndex(s => s === null);
+        function handleSentenceClick(word, bankIndex) {
+            const data = sentenceBlocksData[currentSentenceIndex];
+            const currentEmptyIndex = sentenceSlots.findIndex(s => s === null);
             
-            if (emptySlotIndex !== -1) {
-                slots[emptySlotIndex] = word;
-                bank[bankIndex] = null;
-                renderSentenceGame();
-            }
-        }
-
-        function moveSlotToBank(slotIndex) {
-            const word = slots[slotIndex];
-            const emptyBankIndex = bank.findIndex(b => b === null);
+            if (currentEmptyIndex === -1) return; // 已經滿了
             
-            if (emptyBankIndex !== -1) {
-                bank[emptyBankIndex] = word;
-                slots[slotIndex] = null;
+            // 防錯機制：檢查點擊的字，是否符合目前空格需要的字
+            if (word === data.pairs[currentEmptyIndex].word) {
+                // 正確，放入空格
+                sentenceSlots[currentEmptyIndex] = word;
+                sentenceBank[bankIndex] = null;
                 renderSentenceGame();
+            } else {
+                // 錯誤，按鈕變紅震動
+                const btn = document.getElementById('sentence-bank').children[bankIndex];
+                btn.className = btn.className.replace('border-gray-300 hover:border-blue-400 hover:bg-blue-100 text-gray-700', 'bg-red-50 border-red-400 text-red-600 animate-shake');
+                
+                // 延遲恢復
+                setTimeout(() => {
+                    if(sentenceBank[bankIndex] !== null) {
+                        btn.className = btn.className.replace('bg-red-50 border-red-400 text-red-600 animate-shake', 'bg-white border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-100');
+                    }
+                }, 600);
             }
         }
 
         function checkSentenceWin() {
-            if (slots.every(s => s !== null)) {
-                const target = sentencesData[currentSentenceIndex].words.join('');
-                const current = slots.join('');
+            if (sentenceSlots.every(s => s !== null)) {
+                document.getElementById('sentence-bank-container').classList.add('hidden');
+                document.getElementById('sentence-success').classList.remove('hidden');
                 
-                if (target === current) {
-                    // 答對了
-                    document.getElementById('bank-container').classList.add('hidden');
-                    document.getElementById('sentence-success').classList.remove('hidden');
-                    
-                    if (currentSentenceIndex === sentencesData.length - 1) {
-                        // 全破
-                        document.getElementById('next-sentence-btn').classList.add('hidden');
-                        document.getElementById('all-sentence-complete').classList.remove('hidden');
-                    }
+                if (currentSentenceIndex === sentenceBlocksData.length - 1) {
+                    document.getElementById('next-sentence-btn').classList.add('hidden');
+                    document.getElementById('all-sentence-complete').classList.remove('hidden');
                 }
             }
         }
 
         function nextSentence() {
-            if (currentSentenceIndex < sentencesData.length - 1) {
+            if (currentSentenceIndex < sentenceBlocksData.length - 1) {
                 currentSentenceIndex++;
                 initSentenceGame();
+            }
+        }
+
+        // ==========================================
+        // 遊戲 4：故事排序邏輯
+        // ==========================================
+        let sequenceSlots = [];
+        let sequenceBank = [];
+        
+        function initSequenceGame() {
+            sequenceSlots = [];
+            // 打亂故事選項
+            sequenceBank = [...sequenceData].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('sequence-success').classList.add('hidden');
+            document.getElementById('sequence-bank-container').classList.remove('hidden');
+            
+            renderSequenceGame();
+        }
+
+        function renderSequenceGame() {
+            const slotsContainer = document.getElementById('sequence-slots');
+            const bankContainer = document.getElementById('sequence-bank');
+            
+            // 渲染已排好的順序
+            slotsContainer.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                const item = sequenceSlots[i];
+                if (item) {
+                    slotsContainer.innerHTML += `
+                        <div class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl text-lg md:text-xl font-bold text-purple-800 flex items-center gap-4 shadow-sm">
+                            <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">${i+1}</span>
+                            ${item.text}
+                        </div>`;
+                } else {
+                    slotsContainer.innerHTML += `
+                        <div class="p-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl text-lg md:text-xl text-gray-400 flex items-center gap-4">
+                            <span class="bg-gray-300 text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">${i+1}</span>
+                            等待放入...
+                        </div>`;
+                }
+            }
+
+            // 渲染下方選項
+            bankContainer.innerHTML = '';
+            sequenceBank.forEach((item, index) => {
+                if (item !== null) {
+                    bankContainer.innerHTML += `
+                        <button onclick="handleSequenceClick(${item.id}, ${index})" class="w-full text-left p-4 bg-white border-2 border-gray-300 rounded-xl text-lg md:text-xl font-bold text-gray-700 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-800 shadow-sm transition-all transform hover:-translate-y-1 cursor-pointer">
+                            ${item.text}
+                        </button>`;
+                } else {
+                    bankContainer.innerHTML += `<div class="hidden"></div>`;
+                }
+            });
+
+            if (sequenceSlots.length === 4) {
+                document.getElementById('sequence-bank-container').classList.add('hidden');
+                document.getElementById('sequence-success').classList.remove('hidden');
+            }
+        }
+
+        function handleSequenceClick(itemId, bankIndex) {
+            const expectedId = sequenceSlots.length + 1; // 預期下一個點擊的順序（1, 2, 3, 4）
+            
+            if (itemId === expectedId) {
+                // 順序正確，移動到上方
+                const item = sequenceBank[bankIndex];
+                sequenceSlots.push(item);
+                sequenceBank[bankIndex] = null;
+                renderSequenceGame();
+            } else {
+                // 順序錯誤，震動提示
+                const btn = document.getElementById('sequence-bank').children[bankIndex];
+                btn.className = btn.className.replace('border-gray-300 hover:border-purple-400 hover:bg-purple-50 text-gray-700', 'bg-red-50 border-red-400 text-red-600 animate-shake');
+                
+                setTimeout(() => {
+                    if(sequenceBank[bankIndex] !== null) {
+                        btn.className = btn.className.replace('bg-red-50 border-red-400 text-red-600 animate-shake', 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:bg-purple-50');
+                    }
+                }, 600);
             }
         }
 
         // 初始化
         window.onload = () => {
             renderMatchGame();
+            initEmojiGame();
             initSentenceGame();
+            initSequenceGame();
         };
 
     </script>
