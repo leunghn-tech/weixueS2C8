@@ -282,33 +282,35 @@
             {
                 id: 1,
                 parts: [
-                    { type: 'slot', word: "為之", hint: "去做它" },
-                    { type: 'text', text: "，則難者" },
-                    { type: 'slot', word: "亦", hint: "也" },
-                    { type: 'slot', word: "易", hint: "變容易" },
-                    { type: 'text', text: "矣。" }
+                    { type: 'text', text: "吾" },
+                    { type: 'slot', word: "一瓶", hint: "一個水瓶" },
+                    { type: 'slot', word: "一缽", hint: "一個飯碗" },
+                    { type: 'text', text: "足矣。" }
                 ],
-                shuffled: ["易", "為之", "亦"]
+                shuffled: ["一缽", "一瓶"]
             },
             {
                 id: 2,
                 parts: [
-                    { type: 'slot', word: "子", hint: "你" },
-                    { type: 'text', text: "何" },
-                    { type: 'slot', word: "恃", hint: "憑/依靠" },
-                    { type: 'text', text: "而往？" }
+                    { type: 'text', text: "人之" },
+                    { type: 'slot', word: "為學", hint: "做學問" },
+                    { type: 'text', text: "有" },
+                    { type: 'slot', word: "難易", hint: "困難與容易" },
+                    { type: 'slot', word: "乎", hint: "嗎" },
+                    { type: 'text', text: "？" }
                 ],
-                shuffled: ["恃", "子"]
+                shuffled: ["乎", "為學", "難易"]
             },
             {
                 id: 3,
                 parts: [
-                    { type: 'slot', word: "旦旦", hint: "天天" },
-                    { type: 'text', text: "而學之，" },
-                    { type: 'slot', word: "久", hint: "長久" },
-                    { type: 'text', text: "而不怠。" }
+                    { type: 'text', text: "吾" },
+                    { type: 'slot', word: "資", hint: "天資" },
+                    { type: 'text', text: "之" },
+                    { type: 'slot', word: "昏", hint: "愚鈍" },
+                    { type: 'text', text: "不逮人也。" }
                 ],
-                shuffled: ["久", "旦旦"]
+                shuffled: ["昏", "資"]
             }
         ];
 
@@ -421,9 +423,9 @@
                     selectedLeft = null;
                     selectedRight = null;
                     
-                    if (matchedPairs.length === vocabData.length) {
-                        addStars(1); // 配對全破加一星
-                    }
+                    // 修改：每一個字成功配對就獲得 1 分
+                    addStars(1);
+                    
                     renderMatchGame();
                 } else {
                     // 配對失敗：加入動畫並延遲重置
